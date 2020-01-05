@@ -27,4 +27,11 @@ class SessionsController extends Controller
             return redirect()->back()->withInput(); // withInput()返回时，能使 old() 保持表单前次的值
         }
     }
+
+    public function destroy()
+    {
+        Auth::logout();
+        session()->flash('success', '您已成功退出！');
+        return redirect()->route('login');
+    }
 }
