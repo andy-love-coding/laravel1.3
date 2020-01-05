@@ -26,6 +26,14 @@ class UsersController extends Controller
         ], [
             'name.required' => '姓名都不写，想上天么？'
         ]);
-        return;
+        
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => bcrypt($request->password)
+        ]);
+
+        session()->flash('success', '欢迎，您将开启一段新的旅程！');
+        return redirect()->route('users.show', [$user]); // route() 方法会自动获取 model 的主键，[$user]同$user->id
     }
 }
