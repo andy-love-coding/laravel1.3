@@ -6,4 +6,12 @@
     <h5 class="mt0 mb1">{{ $user->name }}<small>/ {{ $status->created_at->diffForHumans() }}</small></h5>
     {{ $status->content }}
   </div>
+
+  @can ('destroy', $status)
+    <form action="{{ route('statuses.destroy', $status->id) }}" method="post" onsubmit="return confirm('确定要删除这条微博吗？')">
+      @csrf
+      {{ method_field('DELETE') }}
+      <button type="submit" class="btn btn-sm btn-danger">删除</button>
+    </form>
+  @endcan
 </li>
