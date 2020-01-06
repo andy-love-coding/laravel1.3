@@ -28,10 +28,19 @@ class SessionsController extends Controller
         ]);
 
         if (Auth::attempt($credentials, $request->has('remember'))) {
-            session()->flash('success', '登录成功！');
+            // 登录成功
+            if (Auth::user()->activated) {
+                // 已激活
+                session()->flash('success', '登录成功！');
+                $fallback = route('users.show', Auth::user());
+                return redirect()->intended($fallback); // 友好转向
+            } else {
+                // 未激活
+                Auth::logout();
+                session()->flash('warning', '您的账号还未激活，请检查您的邮箱以激活账号！');
+                return redirect('/');
+            }
 
-            $fallback = route('users.show', Auth::user());
-            return redirect()->intended($fallback); // 友好转向，登录成功跳转上一步尝试访问的页面，没有的话，默认跳转个人资料页面
         } else {
             session()->flash('danger', '很抱歉，您的账号和密码不匹配！');
             return redirect()->back()->withInput(); // withInput()返回时，能使 old() 保持表单前次的值

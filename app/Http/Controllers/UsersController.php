@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\User;
 use Auth;
+use Mail;
 
 class UsersController extends Controller
 {
@@ -12,7 +13,7 @@ class UsersController extends Controller
     {
         // 需登录的操作
         $this->middleware('auth', [
-            'except' => ['show', 'create', 'store', 'index']
+            'except' => ['show', 'create', 'store', 'index', 'confirmEmail']
         ]);
         
         // 只有游客能做的操作
@@ -47,9 +48,9 @@ class UsersController extends Controller
             'password' => bcrypt($request->password)
         ]);
 
-        Auth::login($user);
-        session()->flash('success', '欢迎，您将开启一段新的旅程！');
-        return redirect()->route('users.show', [$user]); // route() 方法会自动获取 model 的主键，[$user]同$user->id
+        $this->sendEmailConfirmationTo($user);
+        session()->flash('success', '验证邮件已经发送到您的邮箱，请注意查收！');
+        return redirect('/');
     }
 
     public function edit(User $user)
@@ -90,5 +91,32 @@ class UsersController extends Controller
         $user->delete();
         session()->flash('success', '删除用户成功！');
         return back();
+    }
+
+    // 发送激活邮件
+    public function sendEmailConfirmationTO($user)
+    {
+        $view = 'emails.confirm'; // 邮件视图
+        $data = compact('user'); // 传给邮件视图的数据
+        $from = '000@qq.com';
+        $name = '刘金';
+        $to = $user->email;
+        $subject = '感谢注册，请激活你您的邮箱账号。';
+        Mail::send($view, $data, function ($message) use ($from, $name, $to, $subject) {
+            $message->from($from, $name)->to($to)->subject($subject);
+        });
+    }
+
+    // 确认邮箱（激活）
+    public function confirmEmail($token) {
+        $user = User::where('activation_token', $token)->firstOrfail();
+
+        $user->activated = true;
+        $user->activation_token = null;
+        $user->save();
+
+        Auth::login($user);
+        session()->flash('success', '恭喜你，激活成功！');
+        return redirect()->route('users.show', $user->id);
     }
 }
