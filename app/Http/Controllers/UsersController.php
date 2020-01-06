@@ -12,7 +12,7 @@ class UsersController extends Controller
     {
         // 需登录的操作
         $this->middleware('auth', [
-            'except' => ['show', 'create', 'store']
+            'except' => ['show', 'create', 'store', 'index']
         ]);
         
         // 只有游客能做的操作
@@ -35,7 +35,7 @@ class UsersController extends Controller
     {
         $this->validate($request, [
             'name' => 'required|max:50',
-            'email' => 'required|email|max:255',
+            'email' => 'required|unique:users|email|max:255',
             'password' => 'required|confirmed|min:6'
         ], [
             'name.required' => '姓名都不写，想上天么？'
@@ -76,5 +76,11 @@ class UsersController extends Controller
         
         session()->flash('success', '更新个人资料成功！');
         return redirect()->route('users.show', $user->id);
+    }
+
+    public function index()
+    {
+        $users = User::paginate(10);
+        return view('users.index', compact('users'));
     }
 }
