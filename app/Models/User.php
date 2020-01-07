@@ -46,8 +46,11 @@ class User extends Authenticatable
 
     public function feed()
     {
-        return $this->statuses()
-                    ->orderBy('created_at', 'desc');
+        $user_ids = $this->followers->pluck('id')->toArray();
+        array_push($user_ids, $this->id);
+        return Status::whereIn('user_id', $user_ids)
+                            ->with('user') // 查询微博时，预加载微博的用户数据，避免 N+1 问题
+                            ->orderBy('created_at', 'desc');
     }
 
     // 本 model 为博主 （博主的粉丝类别）
