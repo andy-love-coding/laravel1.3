@@ -113,7 +113,7 @@ class UsersController extends Controller
 
     // 确认邮箱（激活）
     public function confirmEmail($token) {
-        $user = User::where('activation_token', $token)->firstOrfail();
+        $user = User::where('activation_token', $token)->firstOrFail();
 
         $user->activated = true;
         $user->activation_token = null;
