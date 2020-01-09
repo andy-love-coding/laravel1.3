@@ -72,7 +72,7 @@ class UsersController extends Controller
 
         $data = [];
         $data['name'] = $request->name;
-        if ($request->has('password')) {
+        if ($request->password) {
             $data['password'] = bcrypt($request->password);
         }
 

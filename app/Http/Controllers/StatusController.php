@@ -25,7 +25,7 @@ class StatusController extends Controller
         ]);
 
         session()->flash('success', '发布微博成功！');
-        return redirect()->back();
+        return redirect('/');
     }
 
     public function destroy(Status $status)
